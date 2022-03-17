@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+}
+
+group 'com.epam'
+version '1.0'
+
+repositories {
+    mavenCentral()
+}
+
+def lombokVersion = "1.18.22"
+def httpcomponentsVersion = "4.5.13"
+def jacksonVersion = "2.13.2"
+def slf4jVersion = "1.7.36"
+
+dependencies {
+    compileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: httpcomponentsVersion
+    implementation group: 'org.apache.httpcomponents', name: 'httpmime', version: httpcomponentsVersion
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+    implementation group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
+}
+
+test {
+    useJUnitPlatform()
+}
