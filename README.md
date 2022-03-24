@@ -5,7 +5,7 @@ How to generate API KEY: https://support.smartbear.com/zephyr-scale-cloud/docs/r
 <br/>
 
 ## Prerequisites
-1. Create zephyr.properties file in resources <br/>
+1. Create zephyr.properties file in the resources folder of your project<br/>
 2. Add the following properties:
     #### Zephyr Scale connection details. E.g. for Cucumber report:
     baseUri=https://api.zephyrscale.smartbear.com/v2/ <br/>
@@ -30,7 +30,7 @@ How to generate API KEY: https://support.smartbear.com/zephyr-scale-cloud/docs/r
     Build jar file of this zephyrscaleapi project
 
 ### Gradle project:
-1. Create 'libs' folder in the root directory of the external project
+1. Create 'libs' folder in the root directory of your project
 2. Copy 'zephyrapiaccess-1.0.jar' into 'libs' folder
 3. In build.gradle:
    1. Add dependency to build.gradle: <br/>
