@@ -2,14 +2,12 @@ package com.epam.utils;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,6 +16,34 @@ import java.util.zip.ZipOutputStream;
 
 @Slf4j
 public class FileUtil {
+
+    public Path findResourceFilePath(String fileName) throws IOException {
+        Path projectPath = getProjectRootPath();
+        Path src = Paths.get(projectPath.toString() + "/src");
+        Path resource = null;
+
+        Optional<Path> first = Files.walk(src)
+                .filter(x -> x.getFileName().toString().equals(fileName))
+                .findFirst();
+        if (first.isPresent()) {
+            resource = first.get().toAbsolutePath();
+        }
+
+        log.info("resource: " + resource);
+
+        return resource;
+    }
+
+    public Path getProjectRootPath() {
+        File file = new File(System.getProperty("user.dir"));
+        Path path = Paths.get(file.getAbsolutePath());
+
+        if (path.toString().contains("lib")) {
+            log.debug("Project path is withing libs folder. Moving to its parent directory...");
+            path = path.getParent();
+        }
+        return path;
+    }
 
     public boolean deleteExistingFile(File file) {
         if (file.exists()) {
@@ -28,6 +54,8 @@ public class FileUtil {
 
     public File createZip(File resultsFile, String fileExtension) throws IOException {
         Path folderPath = Paths.get(resultsFile.getParent());
+        log.info("Folder path to look for results: " + folderPath);
+
         List<String> filePaths = findAllFilesWithExtension(folderPath, fileExtension);
 
         try (ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(resultsFile.getAbsolutePath()))) {
@@ -59,7 +87,6 @@ public class FileUtil {
                 return false;
             }
 
-            log.warn("File " + file.getAbsolutePath() + " is empty. Waiting 2 sec before retry...");
             wait(2);
             file = new File(filePath);
 
@@ -71,7 +98,7 @@ public class FileUtil {
         return false;
     }
 
-    private void wait(int sec){
+    private void wait(int sec) {
         try {
             TimeUnit.SECONDS.sleep(sec);
         } catch (InterruptedException ie) {

@@ -19,7 +19,7 @@ How to generate API KEY: https://support.smartbear.com/zephyr-scale-cloud/docs/r
     resultsFileExtension=json <br/>
     
     #### Customize test cycle details (optional). If customTestCycle=false, testCycle params are ignored. 
-    customTestCycle=true <br/>
+    customTestCycle=false <br/>
     testCycleName=Test Cycle Name <br/>
     testCycleDescription=Test Cycle Description <br/>
     testCycleFolderName=Test Cycle Folder (make sure the folder name exists in Zephyr Scale)<br/>
@@ -27,11 +27,25 @@ How to generate API KEY: https://support.smartbear.com/zephyr-scale-cloud/docs/r
 3. Security Note: Such parameters as apiKey and projectKey should be provided as environment variables (e.g. from CI, command line or Vault).
 
 ## Usage as lib in an external project:
+    Build jar file of this zephyrscaleapi project
+
 ### Gradle project:
 1. Create 'libs' folder in the root directory of the external project
 2. Copy 'zephyrapiaccess-1.0.jar' into 'libs' folder
-3. Add dependency to build.gradle:     
-   implementation fileTree(include: ["zephyrscaleapi-1.0.jar"], dir: "libs")
-4. Create a method with the code:
-   ResultPublisher resultPublisher = new ResultPublisher();
-   resultPublisher.publishCucumberResult();
+3. In build.gradle:
+   1. Add dependency to build.gradle: <br/>
+      scheduleRuntime files("libs/zephyrscaleapi-1.0.jar")
+   2. Add configuration: <br/>
+       configurations {
+         scheduleRuntime {
+            extendsFrom implementation
+          }
+        }
+   3. Add task: <br/>
+      task runScheduleReader(type: JavaExec) {
+      workingDir("libs")
+      mainClass.set("com.epam.Main")
+      classpath = configurations.scheduleRuntime
+      }
+   4. Make "runScheduleReader" task be executed after the main task: <br/>
+    e.g. test.finalizedBy(runScheduleReader)

@@ -1,19 +1,26 @@
 package com.epam.utils;
 
+import lombok.extern.slf4j.Slf4j;
+
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Properties;
 
+@Slf4j
 public class PropertiesUtil {
+    private final Path propertiesFilePath;
+    private final Properties properties;
 
-    private static final String PROP_FILE = "/zephyr.properties";
-    private final Properties properties = new Properties();
+    public PropertiesUtil(Path propertiesFilePath) {
+        this.propertiesFilePath = propertiesFilePath;
+        this.properties = new Properties();
+    }
 
-    public String read(String key) {
-        try (InputStream is = getClass().getResourceAsStream(PROP_FILE)) {
+    public String readProperties(String key) throws IOException {
+        try (InputStream is = new FileInputStream(propertiesFilePath.toString())) {
             properties.load(is);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         return properties.getProperty(key);
     }

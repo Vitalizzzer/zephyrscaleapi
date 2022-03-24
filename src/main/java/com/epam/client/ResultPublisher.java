@@ -26,6 +26,8 @@ import org.apache.http.util.EntityUtils;
 import java.io.*;
 
 import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -49,92 +51,77 @@ public class ResultPublisher {
     private final String folderType;
     private final String maxResults;
 
-    public ResultPublisher(FileUtil fileUtil, PropertiesUtil propertiesUtil) {
+    public ResultPublisher(FileUtil fileUtil, PropertiesUtil propertiesUtil) throws IOException {
         this.fileUtil = fileUtil;
-        baseUri = propertiesUtil.read("baseUri");
-        uriSuffix = propertiesUtil.read("uriSuffix");
-        apiKey = propertiesUtil.read("apiKey");
-        projectKey = propertiesUtil.read("projectKey");
-        autoCreateTestCases = propertiesUtil.read("autoCreateTestCases");
-        resultsFileExtension = propertiesUtil.read("resultsFileExtension");
-        String resultsFolder = propertiesUtil.read("resultsFolder");
-        resultsFile = new File(resultsFolder + "testResults.zip");
+        baseUri = propertiesUtil.readProperties("baseUri");
+        uriSuffix = propertiesUtil.readProperties("uriSuffix");
+        apiKey = propertiesUtil.readProperties("apiKey");
+        projectKey = propertiesUtil.readProperties("projectKey");
+        autoCreateTestCases = propertiesUtil.readProperties("autoCreateTestCases");
+        resultsFileExtension = propertiesUtil.readProperties("resultsFileExtension");
 
-        customTestCycle = Boolean.parseBoolean(propertiesUtil.read("customTestCycle"));
-        testCycleName = propertiesUtil.read("testCycleName");
-        testCycleFolderName = propertiesUtil.read("testCycleFolderName");
-        testCycleDescription = propertiesUtil.read("testCycleDescription");
-        testCycleJiraProjectVersion = Integer.parseInt(propertiesUtil.read("testCycleJiraProjectVersion"));
+        Path resultsPath = Paths.get(propertiesUtil.readProperties("resultsFolder"));
+        Path projectRootPath = fileUtil.getProjectRootPath();
+        resultsFile = new File(projectRootPath + "/" + resultsPath + "/testResults.zip");
 
-        folderType = propertiesUtil.read("folderType");
-        maxResults = propertiesUtil.read("maxResults");
+        customTestCycle = Boolean.parseBoolean(propertiesUtil.readProperties("customTestCycle"));
+        testCycleName = propertiesUtil.readProperties("testCycleName");
+        testCycleFolderName = propertiesUtil.readProperties("testCycleFolderName");
+        testCycleDescription = propertiesUtil.readProperties("testCycleDescription");
+        testCycleJiraProjectVersion = Integer.parseInt(propertiesUtil.readProperties("testCycleJiraProjectVersion"));
+
+        folderType = propertiesUtil.readProperties("folderType");
+        maxResults = propertiesUtil.readProperties("maxResults");
     }
 
+    public String publishResult() throws IOException, URISyntaxException {
+        String testCycleResponse;
+        String uri = baseUri + uriSuffix;
+        fileUtil.deleteExistingFile(resultsFile);
+        log.info("Expected results file: " + resultsFile);
+        File zipFile = fileUtil.createZip(resultsFile, resultsFileExtension);
 
-    public String publishResult() {
-//        log.info("baseUri " + baseUri);
-//        log.info("uriSuffix " + uriSuffix);
-//        log.info("apiKey " + apiKey);
-//        log.info("projectKey " + projectKey);
-//        log.info("autoCreateTestCases " + autoCreateTestCases);
-//        log.info("resultsFileExtension " + resultsFileExtension);
-//        log.info("resultsFolder " + resultsFolder);
-//        log.info("customTestCycle " + customTestCycle);
-//        log.info("testCycleName " + testCycleName);
-//        log.info("testCycleFolderName " + testCycleFolderName);
-//        log.info("testCycleDescription " + testCycleDescription);
-//        log.info("testCycleJiraProjectVersion " + testCycleJiraProjectVersion);
-//        log.info("folderType " + folderType);
-//        log.info("maxResults " + maxResults);
+        List<NameValuePair> params = new ArrayList<>();
+        params.add(new BasicNameValuePair("projectKey", projectKey));
+        params.add(new BasicNameValuePair("autoCreateTestCases", autoCreateTestCases));
+        URIBuilder uriBuilder = new URIBuilder(uri);
+        uriBuilder.addParameters(params);
 
-        String testCycleResponse = null;
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpPost postRequest = new HttpPost(uriBuilder.build());
+        postRequest.setHeader("Authorization", "Bearer " + apiKey);
 
-        try {
-            String uri = baseUri + uriSuffix;
-            fileUtil.deleteExistingFile(resultsFile);
-            File zipFile = fileUtil.createZip(resultsFile, resultsFileExtension);
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+        builder.setMode(HttpMultipartMode.STRICT);
 
-            List<NameValuePair> params = new ArrayList<>();
-            params.add(new BasicNameValuePair("projectKey", projectKey));
-            params.add(new BasicNameValuePair("autoCreateTestCases", autoCreateTestCases));
-            URIBuilder uriBuilder = new URIBuilder(uri);
-            uriBuilder.addParameters(params);
+        builder.addBinaryBody(
+                "file",
+                new FileInputStream(zipFile),
+                ContentType.MULTIPART_FORM_DATA,
+                zipFile.getName()
+        );
 
-            CloseableHttpClient httpClient = HttpClients.createDefault();
-            HttpPost postRequest = new HttpPost(uriBuilder.build());
-            postRequest.setHeader("Authorization", "Bearer " + apiKey);
+        if (customTestCycle) {
+            String testCycle = generateTestCycle(testCycleName, testCycleDescription, testCycleFolderName,
+                    testCycleJiraProjectVersion);
 
-            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-            builder.setMode(HttpMultipartMode.STRICT);
-
-            builder.addBinaryBody(
-                    "file",
-                    new FileInputStream(zipFile),
-                    ContentType.MULTIPART_FORM_DATA,
-                    zipFile.getName()
-            );
-
-            if (customTestCycle) {
-                String testCycle = generateTestCycle(testCycleName, testCycleDescription, testCycleFolderName,
-                        testCycleJiraProjectVersion);
-
-                if (testCycle != null) {
-                    builder.addTextBody(
-                            "testCycle",
-                            testCycle,
-                            ContentType.APPLICATION_JSON
-                    );
-                }
+            if (testCycle != null) {
+                builder.addTextBody(
+                        "testCycle",
+                        testCycle,
+                        ContentType.APPLICATION_JSON
+                );
             }
-
-            HttpEntity multipart = builder.build();
-            postRequest.setEntity(multipart);
-
-            CloseableHttpResponse response = httpClient.execute(postRequest);
-            testCycleResponse = EntityUtils.toString(response.getEntity());
-        } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
         }
+
+        HttpEntity multipart = builder.build();
+        postRequest.setEntity(multipart);
+
+        CloseableHttpResponse response = httpClient.execute(postRequest);
+        int responseCode = response.getStatusLine().getStatusCode();
+        log.info("Response status code: " + responseCode);
+        testCycleResponse = EntityUtils.toString(response.getEntity());
+
         return testCycleResponse;
     }
 
@@ -172,13 +159,13 @@ public class ResultPublisher {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         CloseableHttpResponse response = httpClient.execute(getRequest);
         int responseCode = response.getStatusLine().getStatusCode();
-        log.info("Get folders response code for folder type " + folderType + " is: " + responseCode);
+        log.info("Get Zephyr Scale folders response status code: " + responseCode);
 
         if (responseCode == 200) {
             String responseEntity = EntityUtils.toString(response.getEntity());
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            folders = objectMapper.readValue(responseEntity, new TypeReference<Folders>() {
+            folders = objectMapper.readValue(responseEntity, new TypeReference<>() {
             });
         }
         return folders;
