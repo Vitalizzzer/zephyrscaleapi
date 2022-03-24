@@ -1,4 +1,5 @@
-## Zephyr Scale API - Automation Results Update 
+## Zephyr Scale API - Automation Results Update Tool
+The tool provides an opportunity to update test cases status and insert Cucumber test results into Zephyr Scale Cloud.
 Detailed Automation API requests can be found here: https://support.smartbear.com/zephyr-scale-cloud/api-docs/#tag/Automations
 <br/>
 How to generate API KEY: https://support.smartbear.com/zephyr-scale-cloud/docs/rest-api/generating-api-access-tokens.html
@@ -26,7 +27,7 @@ How to generate API KEY: https://support.smartbear.com/zephyr-scale-cloud/docs/r
     testCycleJiraProjectVersion=1 <br/>
 3. Security Note: Such parameters as apiKey and projectKey should be provided as environment variables (e.g. from CI, command line or Vault).
 
-## Usage as lib in an external project:
+## Usage of the tool in the project:
     Build jar file of this zephyrscaleapi project
 
 ### Gradle project:
