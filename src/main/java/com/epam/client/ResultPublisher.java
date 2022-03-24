@@ -48,6 +48,7 @@ public class ResultPublisher {
     private final String testCycleFolderName;
     private final String testCycleDescription;
     private final Integer testCycleJiraProjectVersion;
+    private final String customFields;
     private final String folderType;
     private final String maxResults;
 
@@ -69,6 +70,7 @@ public class ResultPublisher {
         testCycleFolderName = propertiesUtil.readProperties("testCycleFolderName");
         testCycleDescription = propertiesUtil.readProperties("testCycleDescription");
         testCycleJiraProjectVersion = Integer.parseInt(propertiesUtil.readProperties("testCycleJiraProjectVersion"));
+        customFields = propertiesUtil.readProperties("customFields");
 
         folderType = propertiesUtil.readProperties("folderType");
         maxResults = propertiesUtil.readProperties("maxResults");
@@ -103,7 +105,7 @@ public class ResultPublisher {
 
         if (customTestCycle) {
             String testCycle = generateTestCycle(testCycleName, testCycleDescription, testCycleFolderName,
-                    testCycleJiraProjectVersion);
+                    testCycleJiraProjectVersion, customFields);
 
             if (testCycle != null) {
                 builder.addTextBody(
@@ -122,10 +124,15 @@ public class ResultPublisher {
         log.info("Response status code: " + responseCode);
         testCycleResponse = EntityUtils.toString(response.getEntity());
 
+        if (responseCode != 200) {
+            log.error("Response body: " + testCycleResponse);
+        }
+
         return testCycleResponse;
     }
 
-    private String generateTestCycle(String name, String description, String folderName, int jiraProjectVersion) throws IOException, URISyntaxException {
+    private String generateTestCycle(String name, String description, String folderName,
+                                     int jiraProjectVersion, String customFields) throws IOException, URISyntaxException {
         Folders folders = getZephyrFolders();
         List<Integer> ids = getZephyrFoldersIdsByName(folders, folderName);
 
@@ -133,12 +140,16 @@ public class ResultPublisher {
             return null;
         }
 
-        return TestCycleBuilder.builder()
+        String s = TestCycleBuilder.builder()
                 .name(name)
                 .description(description)
                 .jiraProjectVersion(jiraProjectVersion)
                 .folderId(ids.get(0))
+                .customFields(customFields)
                 .build().toString();
+
+        log.info("TestCycleBuilder: "+s);
+        return s;
     }
 
     public Folders getZephyrFolders() throws IOException, URISyntaxException {

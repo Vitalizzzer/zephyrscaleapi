@@ -25,6 +25,10 @@ How to generate API KEY: https://support.smartbear.com/zephyr-scale-cloud/docs/r
     testCycleDescription=Test Cycle Description <br/>
     testCycleFolderName=Test Cycle Folder (make sure the folder name exists in Zephyr Scale)<br/>
     testCycleJiraProjectVersion=1 <br/>
+    customFields={} <br/>
+    #### Get folders for TEST_CASE, TEST_PLAN or TEST_CYCLE. Used only when customTestCycle=true.
+    folderType=TEST_CYCLE <br/>
+    maxResults=20 <br/>
 3. Security Note: Such parameters as apiKey and projectKey should be provided as environment variables (e.g. from CI, command line or Vault).
 
 ## Usage of the tool in the project:
