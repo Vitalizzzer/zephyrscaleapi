@@ -126,6 +126,8 @@ public class ResultPublisher {
 
         if (responseCode != 200) {
             log.error("Response body: " + testCycleResponse);
+            log.error("Note: response code 400 doesn't mean the results were not published. " +
+                    "Please check Zephyr Scale Tests and Cycles.");
         }
 
         return testCycleResponse;
