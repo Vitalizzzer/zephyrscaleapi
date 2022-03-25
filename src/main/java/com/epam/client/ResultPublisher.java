@@ -125,8 +125,8 @@ public class ResultPublisher {
         testCycleResponse = EntityUtils.toString(response.getEntity());
 
         if (responseCode != 200) {
-            log.error("Response body: " + testCycleResponse);
-            log.error("Note: response code 400 doesn't mean the results were not published. " +
+            log.warn("Response body: " + testCycleResponse);
+            log.warn("Note: response code 400 doesn't mean the results were not published. " +
                     "Please check Zephyr Scale Tests and Cycles.");
         }
 
