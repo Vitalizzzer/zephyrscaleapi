@@ -1,5 +1,5 @@
-## Zephyr Scale API - Automation Results Update Tool
-The tool provides an opportunity to update test cases status and insert Cucumber test results into Zephyr Scale Cloud.
+## Zephyr Scale API - Publish Automation Results Tool
+The tool provides an opportunity to update test cases status and publish automation test results into Zephyr Scale Cloud.
 Detailed Automation API requests can be found here: https://support.smartbear.com/zephyr-scale-cloud/api-docs/#tag/Automations
 <br/>
 How to generate API KEY: https://support.smartbear.com/zephyr-scale-cloud/docs/rest-api/generating-api-access-tokens.html
