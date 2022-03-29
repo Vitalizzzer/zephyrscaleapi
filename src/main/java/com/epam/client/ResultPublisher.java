@@ -142,16 +142,13 @@ public class ResultPublisher {
             return null;
         }
 
-        String s = TestCycleBuilder.builder()
+        return TestCycleBuilder.builder()
                 .name(name)
                 .description(description)
                 .jiraProjectVersion(jiraProjectVersion)
                 .folderId(ids.get(0))
                 .customFields(customFields)
                 .build().toString();
-
-        log.info("TestCycleBuilder: "+s);
-        return s;
     }
 
     public Folders getZephyrFolders() throws IOException, URISyntaxException {
