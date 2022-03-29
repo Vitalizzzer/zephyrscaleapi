@@ -107,7 +107,10 @@ public class FileUtil {
     }
 
     public List<String> findAllFilesWithExtension(Path folderPath, String fileExtension) throws IOException {
+        log.warn("Path to look for the file: " + folderPath);
+
         if (!Files.isDirectory(folderPath)) {
+            log.warn("Incorrect path to look for the file: " + folderPath);
             throw new IllegalArgumentException("Path must be a directory!");
         }
 
