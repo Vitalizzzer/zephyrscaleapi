@@ -4,7 +4,7 @@ Detailed Automation API requests and properties can be found here: [Zephyr Scale
 How to generate API KEY: [Generating API Access Tokens](https://support.smartbear.com/zephyr-scale-cloud/docs/rest-api/generating-api-access-tokens.html)  
 
 ## Prerequisites
-1. Create zephyr.properties file in the resources folder of your project<br/>
+1. Create ***zephyr.properties*** file in the ***resources*** folder of your project<br/>
 2. Add the following properties:
     #### Zephyr Scale connection details. E.g. for Cucumber report:
    >baseUri=https://api.zephyrscale.smartbear.com/v2/  
